@@ -1,4 +1,4 @@
-name: Build & Deploy hummingbot
+name: Build & Push hummingbot
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -49,27 +49,3 @@ jobs:
           provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy:
-    name: Deploy to EC2
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            cd /srv/coin
-
-            # 登录 GHCR（hummingbot 镜像由 API 动态拉取创建容器）
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-            # 拉取最新 hummingbot 镜像（供 hummingbot-api 动态创建实例用）
-            docker pull ghcr.io/${{ github.repository_owner }}/hummingbot:latest
-
-            docker image prune -f
