@@ -94,6 +94,8 @@ coverage.xml
 /**/.injective_cookie
 
 .env
+.env.secrets
+credentials*
 
 **/.claude/settings.local.json
 
