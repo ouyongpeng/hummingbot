@@ -65,6 +65,9 @@ debug.log
 \#*\#
 .\#*
 
+# Mac
+.DS_Store
+
 # Documentation build dir
 /documentation/site/
 
